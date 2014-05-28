@@ -18,6 +18,17 @@ public class RotateComplex {
 					+ ", " + "(" + edges[i][1][0] + ", " + edges[i][1][1] + ")");
 		}
 	}
+	
+	/**
+	 * Default origin point (0, 0).
+	 * 
+	 * @param edges
+	 * @param angle
+	 * @return
+	 */
+	public static double[][][] rotate(double[][][] edges, double angle) {
+		return rotate(edges, angle, new double[] { 0, 0 });
+	}
 
 	/**
 	 * Rotate complex by given angle.
@@ -26,10 +37,7 @@ public class RotateComplex {
 	 * @param angle
 	 * @return
 	 */
-	public static double[][][] rotate(double[][][] edges, double angle) {
-		// origin (center) point
-		double[] originPoint = { 0, 0 };
-
+	public static double[][][] rotate(double[][][] edges, double angle, double[] originPoint) {
 		// iterate over all edges
 		for (int i = 0; i < edges[0].length; i++) {
 			// rotate first point in edge
