@@ -15,7 +15,7 @@ public class LettersClassification {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Input images
+		// TODO Main function
 		
 
 	}
