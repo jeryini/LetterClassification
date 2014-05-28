@@ -3,13 +3,12 @@ package project2;
 import java.awt.image.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-
+import java.util.*;
 import javax.imageio.ImageIO;
+import edu.stanford.math.plex.*;
 
 public class Functions {
-	public static int[][] ReadPicture(String file) { //TODO Tadej
+	public static int[][] ReadPicture(String file) {
 		try {
 			BufferedImage image = ImageIO.read(new File(file));
 			final byte[] pixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
@@ -32,11 +31,11 @@ public class Functions {
 
 			return result;
 		} catch (IOException e) {
-			return null; //seznam tock (x, y)
+			return null;
 		}
 	}
 	
-	public static int[][] ReadComplex(int[][] slika) { //TODO Tadej
+	public static int[][] ReadComplex(int[][] slika) {
 		final int width = slika.length;
 		final int height = slika[0].length;
 		
@@ -51,13 +50,12 @@ public class Functions {
 		}
 		tocke.size();
 		
-		
 		int[][] result = new int[tocke.size()][2];
 		for (int i=0; i<tocke.size();i++) {
 			result[i] = tocke.get(i);
 		}
 		
-		return result; //seznam tock (x, y)
+		return result;
 	}
 	
 	public static double[][][] DefineEdges(int[][] tocke) { //TODO Jernej
@@ -192,11 +190,87 @@ public class Functions {
 		return filter;
 	}
 	
-	public static double[][][] GenerateBarcode(Filter filter) { //TODO Marija
-		return null;
+	 public static double[][][] GenerateBarcode(Filter filter) {
+	        ExplicitStream complex = new ExplicitStream();
+	        for (int i = 0; i < filter.stages.length; i++) {
+	            Stage stage = filter.stages[i];
+	            Integer[] points = stage.points.toArray(new Integer[stage.points.size()]);
+	            Integer[][] edges = stage.edges.toArray(new Integer[stage.points.size()][2]);
+	            int[] pts = new int[points.length];
+	            for (int j = 0; j < points.length; j++) {
+	                pts[j] = points[j].intValue();
+	            }
+	            int[][] eds = new int[edges.length][];
+	            for (int j = 0; j < edges.length; j++) {
+	                eds[j][0] = edges[j][0].intValue();
+	                eds[j][1] = edges[j][1].intValue();
+	            }
+	            complex.add(pts, i);
+	            complex.add(eds, new double[]{i, i});
+	        }
+	        complex.close();
+	        Persistence persistence = Plex.Persistence();
+	        PersistenceInterval.Float[] intervals = persistence.computeIntervals(complex);
+	        double[][][] arrayOfDouble = printable_intervals(intervals);
+	        return arrayOfDouble;
+	    }
+	    
+		public static char CompareBarcode(double[][][] bars, double[][][][][] idealneCrke) {
+			return 'a';
+		}
+		
+		protected static double[][][] printable_intervals(
+	            PersistenceInterval[] intervals) {
+	        int[] localObject = new int[0];
+	        int j = -1;
+	        for (int k = 0; k < intervals.length; k++) {
+	            if (intervals[k].dimension >= localObject.length) {
+	                int[] arrayOfInt = new int[Math.max(intervals[k].dimension + 1,
+	                        2 * localObject.length)];
+	                for (int m = 0; m < localObject.length; m++) {
+	                    arrayOfInt[m] = localObject[m];
+	                }
+	                localObject = arrayOfInt;
+	            }
+	            j = Math.max(j, intervals[k].dimension);
+	            localObject[intervals[k].dimension] += 1;
+	        }
+	        PersistenceInterval[][] arrayOfPersistenceInterval = new PersistenceInterval[j + 1][];
+	        double[][][] arrayOfDouble = new double[j + 1][][];
+	        for (int k = 0; k < arrayOfPersistenceInterval.length; k++) {
+	            arrayOfPersistenceInterval[k] = new PersistenceInterval[localObject[k]];
+	        }
+	        localObject = new int[arrayOfPersistenceInterval.length];
+	        for (j = 0; j < intervals.length; j++) {
+	            int k = intervals[j].dimension;
+	            int tmp184_182 = k;
+	            int[] tmp184_181 = localObject;
+	            int tmp186_185 = tmp184_181[tmp184_182];
+	            tmp184_181[tmp184_182] = (tmp186_185 + 1);
+	            arrayOfPersistenceInterval[k][tmp186_185] = intervals[j];
+	        }
+	        for (j = 0; j < arrayOfPersistenceInterval.length; j++) {
+	            Arrays.sort(arrayOfPersistenceInterval[j]);
+	        }
+	        for (int i = 0; i < arrayOfPersistenceInterval.length; i++) {
+	            arrayOfDouble[i] = new double[arrayOfPersistenceInterval[i].length][];
+	            for (j = 0; j < arrayOfPersistenceInterval[i].length; j++) {
+	                arrayOfDouble[i][j] = arrayOfPersistenceInterval[i][j]
+	                        .toDouble();
+	            }
+	        }
+	        return arrayOfDouble;
+	    }
+	
+	public static char CompareBarcode(double[][][][] bars, double[][][][][] idealneCrke) {//TODO Marija
+		//preverjas samo prve stiri rotacije
+		return 'i';
 	}
 	
-	public static char CompareBarcode(double[][][] bars, double[][][][][] idealneCrke) {//TODO Marija
+	public static char CompareBarcode2(double[][][][] bars, double[][][][][] idealneCrke) {//TODO Marija
+		// to mora biti dosti enako, samo da
+		// preverjas samo zadnje stiri rotacije
+		// in preverjas samo tiste crke, ki so v konfliktu (ce je 'i' primerjas samo med 'i' in 'j'
 		return 'a';
 	}
 }

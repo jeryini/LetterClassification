@@ -1,5 +1,7 @@
 package project2;
 
+import java.util.ArrayList;
+
 /**
  * @author Jernej Jerin
  * @author Tadej Vodopivec
@@ -31,32 +33,33 @@ public class LetterClassification {
 			double[][][] edges = Functions.DefineEdges(tocke); //TODO
 			edges = Functions.Normalize(edges);
 			
-			for (double kot=0; kot<2*Math.PI; kot+=Math.PI/4) {
+			ArrayList<double[][][]> bars = new ArrayList<double[][][]>();
+			for (double kot=0; kot<2*Math.PI; kot+=Math.PI/2) {
 				edges = Functions.Rotate(edges, kot);
 				Filter filter = Functions.GenerateFilter(edges, numberOfStages);
-				double[][][] bars = Functions.GenerateBarcode(filter); //TODO
-				Functions.CompareBarcode(bars, idealneCrke); //TODO
+				bars.add(Functions.GenerateBarcode(filter)); //TODO
 			}
+			char crka = Functions.CompareBarcode((double[][][][]) bars.toArray(), idealneCrke); //TODO
+			if (crka == 'i' || crka == 'j' || crka == 'l') { //TODO katere crke?
+				for (double kot=Math.PI/4; kot<2*Math.PI; kot+=Math.PI/2) {
+					edges = Functions.Rotate(edges, kot);
+					Filter filter = Functions.GenerateFilter(edges, numberOfStages);
+					bars.add(Functions.GenerateBarcode(filter));
+				}
+				crka = Functions.CompareBarcode2((double[][][][]) bars.toArray(), idealneCrke); //TODO
+			}
+			System.out.println(crka);
 		}
 		
 		
 		
-		
-
-		
-		
-		
-		
-		
-		
-		
-		
+		/*
 		double[][][] edges2 = { { { 5, 5 }, { 0, 10 } }, { { 5, 0 }, { 4, 6 } }};
 		edges2 = Functions.Rotate(edges2, Math.PI / 4);
 
 		for (int i = 0; i < edges2[0].length; i++) {
 			System.out.println("(" + edges2[i][0][0] + ", " + edges2[i][0][1] + ")"
 					+ ", " + "(" + edges2[i][1][0] + ", " + edges2[i][1][1] + ")");
-		}
+		}*/
 	}
 }
