@@ -1,26 +1,118 @@
 package project2;
 
+import java.awt.image.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.imageio.ImageIO;
+
 public class Functions {
-	public static double[][] ReadComplex(String file) {
-		// "C:\Neki"
-		return null; //seznam tock (x, y)
+	public static int[][] ReadPicture(String file) { //TODO Tadej
+		try {
+			BufferedImage image = ImageIO.read(new File(file));
+			final byte[] pixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+			final int width = image.getWidth();
+			final int height = image.getHeight();
+			
+			int[][] result = new int[height][width];
+			for (int pixel = 0, row = 0, col = 0; pixel < pixels.length; pixel += 3) {
+				int r = (pixels[pixel] >> 16) & 0xFF;
+		        int g = (pixels[pixel + 1] >> 8) & 0xFF;
+		        int b = (pixels[pixel + 2] & 0xFF);
+
+				result[row][col] = 1 - (r + g + b) / (3*128);
+				col++;
+				if (col == width) {
+					col = 0;
+					row++;
+				}
+			}
+
+			return result;
+		} catch (IOException e) {
+			return null; //seznam tock (x, y)
+		}
 	}
-	public static double[][][] DefineEdges(double[][] tocke) {
+	
+	public static int[][] ReadComplex(int[][] slika) { //TODO Tadej
+		final int width = slika.length;
+		final int height = slika[0].length;
+		
+		ArrayList<int[]> tocke = new ArrayList<int[]>();
+		
+		for (int i=0;i<width;i++) {
+			for (int j=0;j<height;j++) {
+				if (slika[i][j] == 1) {
+					tocke.add(new int[] {i,j});
+				}
+			}
+		}
+		tocke.size();
+		
+		
+		int[][] result = new int[tocke.size()][2];
+		for (int i=0; i<tocke.size();i++) {
+			result[i] = tocke.get(i);
+		}
+		
+		return result; //seznam tock (x, y)
+	}
+	
+	public static double[][][] DefineEdges(int[][] tocke) { //TODO Jernej
 		// {tocka1, ...}
-		return null; // {{tocka1, tocka2}, ...}
+		return new double[][][] {{{0,0}, {10,0}}, {{10,0}, {10,10}}, {{10,10}, {0,10}}, {{0,10}, {0,0}}}; // {{tocka1, tocka2}, ...}
 	}
 	
 	public static double[][][] Normalize(double[][][] edges) {
-		//druga tocka vedno visja
-		//najdi max in min x in y
-		double[] min;
-		double[] max;
-		for (double[][] edge : edges) {
+		//druga tocka v edge vedno visja
+		double border = 0.15; // ko rotiras za 45, mora biti stranica najvec 1/sqrt(2), ker cene grejo vogali izven kvadranta.
+		
+		double[] min = edges[0][0].clone(), max = edges[0][0].clone();
+		for (double[][] edge: edges) {
+			for (double[] tocka: edge) {
+				if (tocka[0] < min[0]) {
+					min[0] = tocka[0];
+				}
+				if (tocka[1] < min[1]) {
+					min[1] = tocka[1];
+				}
+				if (tocka[0] > max[0]) {
+					max[0] = tocka[0];
+				}
+				if (tocka[1] > max[1]) {
+					max[1] = tocka[1];
+				}
+			}
 		}
 		
+		double[] originalSize = new double[] {(max[0]-min[0]), (max[1]-min[1])};
+
+		double size;
+		double[] offset;
 		
+		if (originalSize[0] > originalSize[1]) {
+			size = originalSize[0];
+			offset = new double[] {0, (size-originalSize[1])/2};
+		}
+		else {
+			size = originalSize[1];
+			offset = new double[] {(size-originalSize[0])/2, 0};
+		}
+
+		for (int edge=0; edge<edges.length; edge++) {
+			if (edges[edge][0][1] > edges[edge][1][1]) { //ce je prva tocka visja od druge, zamenjaj vrstni red
+				double[] point = edges[edge][0];
+				edges[edge][0] = edges[edge][1];
+				edges[edge][1] = point;
+			}
+			for (int tocka=0;tocka<2;tocka++) {
+				for (int koordinata=0;koordinata<2;koordinata++) {
+					edges[edge][tocka][koordinata] = border + offset[koordinata] + (1-2*border)*edges[edge][tocka][koordinata]/size;
+				}
+			}
+		}
 		return edges;
 	}
 	
@@ -32,7 +124,7 @@ public class Functions {
 	 * @return
 	 */
 	public static double[][][] Rotate(double[][][] edges, double angle) {
-		return rotate(edges, angle, new double[] { 50, 50 });
+		return rotate(edges, angle, new double[] { 0.5, 0.5 });
 	}
 
 	/**
@@ -70,14 +162,7 @@ public class Functions {
 				* Math.cos(angle);
 		return newPoint;
 	}
-	
-	public static double[][][] GenerateBarcode(Filter filter) {
-		return null;
-	}
-	public static char CompareBarcode(double[][][] bars, double[][][][][] idealneCrke) {
-		return 'a';
-	}
-	
+
 	/**
 	 * Discretize the edges on the number of given stages. The points in edges
 	 * are normalized (i.e. between 0 and 1).
@@ -105,5 +190,13 @@ public class Functions {
 			filter.stages[(int) (numberOfStages*edge[1][1])].edges.add(new Integer[] {dict.get(edge[0]), dict.get(edge[1])});
 		}
 		return filter;
+	}
+	
+	public static double[][][] GenerateBarcode(Filter filter) { //TODO Marija
+		return null;
+	}
+	
+	public static char CompareBarcode(double[][][] bars, double[][][][][] idealneCrke) {//TODO Marija
+		return 'a';
 	}
 }

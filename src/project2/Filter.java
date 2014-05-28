@@ -13,6 +13,10 @@ public class Filter {
 	
 	public Filter(int numberOfStages) {
 		this.stages = new Stage[numberOfStages];
+		for (int i=0;i<numberOfStages;i++) {
+			this.stages[i] = new Stage();
+		}
+		
 		this.numberOfStages = numberOfStages;
 	}
 }
