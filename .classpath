@@ -2,10 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Users/Jernej/Documents/University/Magistrski program/Computational topology (Racunska topologija)/Seminar work/Project 2/LetterClassification/javaplex-4.2.0.jar" sourcepath="C:/Users/Jernej/Documents/University/Magistrski program/Computational topology (Racunska topologija)/Seminar work/Project 2/LetterClassification/javaplex-src">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/C:/Users/Jernej/Documents/University/Magistrski%20program/Computational%20topology%20(Racunska%20topologija)/Seminar%20work/Project%202/LetterClassification/javadoc/"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="javaplex-4.2.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
