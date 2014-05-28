@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/Jernej/Documents/University/Magistrski program/Computational topology (Racunska topologija)/Seminar work/Project 2/LetterClassification/plex.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
