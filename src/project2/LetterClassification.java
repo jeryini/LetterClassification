@@ -37,9 +37,10 @@ public class LetterClassification {
 			for (double kot=0; kot<2*Math.PI; kot+=Math.PI/2) {
 				edges = Functions.Rotate(edges, kot);
 				Filter filter = Functions.GenerateFilter(edges, numberOfStages);
-				bars.add(Functions.GenerateBarcode(filter)); //TODO
+				double[][][] temp = Functions.GenerateBarcode(filter); 
+				bars.add(temp); //TODO
 			}
-			char crka = Functions.CompareBarcode((double[][][][]) bars.toArray(), idealneCrke); //TODO
+			char crka = Functions.CompareBarcode(bars, idealneCrke); //TODO
 			if (crka == 'i' || crka == 'j' || crka == 'l') { //TODO katere crke?
 				for (double kot=Math.PI/4; kot<2*Math.PI; kot+=Math.PI/2) {
 					edges = Functions.Rotate(edges, kot);
@@ -48,7 +49,7 @@ public class LetterClassification {
 				}
 				crka = Functions.CompareBarcode2((double[][][][]) bars.toArray(), idealneCrke); //TODO
 			}
-			System.out.println(crka);
+			System.out.println("'" + crka + "'");
 		}
 		
 		
