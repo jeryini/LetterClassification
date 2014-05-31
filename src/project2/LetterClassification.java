@@ -27,7 +27,8 @@ public class LetterClassification {
 	};
 	
 	public static void main(String[] args) {
-		int[][] slika = Functions.ReadPicture("C:\\New Folder\\Untitled.png");
+		// read picture from file
+		int[][] slika = Functions.ReadPicture("./letters/a.png");
 		if (slika != null) {
 			int[][] tocke = Functions.ReadComplex(slika);
 			double[][][] edges = Functions.DefineEdges(tocke); //TODO
