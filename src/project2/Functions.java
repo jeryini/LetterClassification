@@ -18,7 +18,7 @@ public class Functions {
 	 * @param file
 	 * @return
 	 */
-	public static int[][] ReadPicture(String file) {
+	public static int[][] readPicture(String file) {
 		try {
 			BufferedImage image = ImageIO.read(new File(file));
 			final byte[] pixels = ((DataBufferByte) image.getRaster()
@@ -49,58 +49,121 @@ public class Functions {
 		}
 	}
 
-	public static int[][] ReadComplex(int[][] slika) {
-		final int width = slika.length;
-		final int height = slika[0].length;
+	/**
+	 * Define point positions of those pixels, whose value is set to 1.
+	 * 
+	 * @param image
+	 * @return
+	 */
+	public static int[][] readComplex(int[][] image) {
+		final int width = image.length;
+		final int height = image[0].length;
 
-		ArrayList<int[]> tocke = new ArrayList<int[]>();
+		ArrayList<int[]> points = new ArrayList<int[]>();
 
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
-				if (slika[i][j] == 1) {
-					tocke.add(new int[] { i, j });
+				if (image[i][j] == 1) {
+					// add point x and y position to array
+					points.add(new int[] { i, j });
 				}
 			}
 		}
-		tocke.size();
 
-		int[][] result = new int[tocke.size()][2];
-		for (int i = 0; i < tocke.size(); i++) {
-			result[i] = tocke.get(i);
+		int[][] result = new int[points.size()][2];
+		for (int i = 0; i < points.size(); i++) {
+			result[i] = points.get(i);
 		}
 
 		return result;
 	}
 
-	public static double[][][] DefineEdges(int[][] tocke) { // TODO Jernej
-		// {tocka1, ...}
-		return new double[][][] { { { 0, 0 }, { 1, 1 } },
-				{ { 1, 1 }, { 3, 1 } }, { { 1, 1 }, { 2, 2 } },
-				{ { 3, 1 }, { 2, 2 } }, { { 3, 1 }, { 4, 0 } } }; // {{tocka1,
-																	// tocka2},
-																	// ...}
+	/**
+	 * Define edges for default distance r = 1.
+	 * 
+	 * @param points
+	 * @return
+	 */
+	public static int[][][] defineEdges(int[][] points) {
+		return defineEdges(points, 1);
 	}
 
-	public static double[][][] Normalize(double[][][] edges) {
+	/**
+	 * Define edges (build a simplical complex) of dimension 1 with nerve of U.
+	 * The distance r should be 1.
+	 * 
+	 * @param points
+	 * @param r
+	 * @return
+	 */
+	public static int[][][] defineEdges(int[][] points, int r) {
+		ArrayList<int[][]> edges = new ArrayList<int[][]>();
+
+		// check all possible two pair combinations
+		int maxX, maxY, minX, minY;
+		for (int i = 0; i < points.length; i++) {
+			for (int j = i + 1; j < points.length; j++) {
+				// check for max, min of x value of two points
+				if (points[i][0] > points[j][0]) {
+					maxX = points[i][0];
+					minX = points[j][0];
+				} else {
+					maxX = points[j][0];
+					minX = points[i][0];
+				}
+
+				// check for max, min of y value of two points
+				if (points[i][1] > points[j][1]) {
+					maxY = points[i][1];
+					minY = points[j][1];
+				} else {
+					maxY = points[j][1];
+					minY = points[i][1];
+				}
+
+				// now we check according to this formula:
+				// U = { [x - r; x + r] x [y - r; y + r] | (x, y) e V }
+				// we want exclusive that is why <
+				if (maxX - r < minX + r && maxY - r < minY + r)
+					edges.add(new int[][] { points[i], points[j] });
+			}
+		}
+
+		int[][][] result = new int[edges.size()][2][2];
+		for (int i = 0; i < edges.size(); i++) {
+			result[i] = edges.get(i);
+		}
+
+		return result;
+	}
+
+	/**
+	 * Normalize the values of point position.
+	 * 
+	 * @param edges
+	 * @return
+	 */
+	public static double[][][] normalize(int[][][] edges) {
 		// druga tocka v edge vedno visja
 		double border = 0.15; // ko rotiras za 45, mora biti stranica najvec
 								// 1/sqrt(2), ker cene grejo vogali izven
 								// kvadranta.
 
-		double[] min = edges[0][0].clone(), max = edges[0][0].clone();
-		for (double[][] edge : edges) {
-			for (double[] tocka : edge) {
-				if (tocka[0] < min[0]) {
-					min[0] = tocka[0];
+		// find minimum point and maximum point
+		int[] min = edges[0][0].clone(), max = edges[0][0].clone();
+		for (int[][] edge : edges) {
+			for (int[] point : edge) {
+				if (point[0] < min[0]) {
+					min[0] = point[0];
 				}
-				if (tocka[1] < min[1]) {
-					min[1] = tocka[1];
+				if (point[1] < min[1]) {
+					min[1] = point[1];
 				}
-				if (tocka[0] > max[0]) {
-					max[0] = tocka[0];
+				if (point[0] > max[0]) {
+					max[0] = point[0];
 				}
-				if (tocka[1] > max[1]) {
-					max[1] = tocka[1];
+				if (point[1] > max[1]) {
+					max[1] = point[1];
 				}
 			}
 		}
@@ -111,6 +174,7 @@ public class Functions {
 		double size;
 		double[] offset;
 
+		// check if length of x value is greater than the length of y value
 		if (originalSize[0] > originalSize[1]) {
 			size = originalSize[0];
 			offset = new double[] { 0, (size - originalSize[1]) / 2 / size };
@@ -119,24 +183,26 @@ public class Functions {
 			offset = new double[] { (size - originalSize[0]) / 2 / size, 0 };
 		}
 
+		// now we need double values
+		double[][][] nEdges = new double[edges.length][2][2];
 		for (int edge = 0; edge < edges.length; edge++) {
 			if (edges[edge][0][1] > edges[edge][1][1]) { // ce je prva tocka
 															// visja od druge,
 															// zamenjaj vrstni
 															// red
-				double[] point = edges[edge][0];
+				int[] point = edges[edge][0];
 				edges[edge][0] = edges[edge][1];
 				edges[edge][1] = point;
 			}
 			for (int tocka = 0; tocka < 2; tocka++) {
 				for (int koordinata = 0; koordinata < 2; koordinata++) {
-					edges[edge][tocka][koordinata] = border
+					nEdges[edge][tocka][koordinata] = border
 							+ offset[koordinata] + (1 - 2 * border)
 							* edges[edge][tocka][koordinata] / size;
 				}
 			}
 		}
-		return edges;
+		return nEdges;
 	}
 
 	/**
@@ -146,7 +212,7 @@ public class Functions {
 	 * @param angle
 	 * @return
 	 */
-	public static double[][][] Rotate(double[][][] edges, double angle) {
+	public static double[][][] rotate(double[][][] edges, double angle) {
 		return rotate(edges, angle, new double[] { 0.5, 0.5 });
 	}
 
@@ -200,7 +266,7 @@ public class Functions {
 	 * @param numberOfStages
 	 * @return
 	 */
-	public static Filter GenerateFilter(double edges[][][], int numberOfStages) {
+	public static Filter generateFilter(double edges[][][], int numberOfStages) {
 		// TODO: include points lying below or on the high border and above low
 		// border (not on low border)
 		// TODO: include only edges that have both points on or below high

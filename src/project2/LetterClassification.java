@@ -28,24 +28,30 @@ public class LetterClassification {
 	
 	public static void main(String[] args) {
 		// read picture from file
-		int[][] slika = Functions.ReadPicture("./letters/a.png");
-		if (slika != null) {
-			int[][] tocke = Functions.ReadComplex(slika);
-			double[][][] edges = Functions.DefineEdges(tocke); //TODO
-			edges = Functions.Normalize(edges);
+		int[][] image = Functions.readPicture("./letters/a.png");
+		
+		if (image != null) {
+			// get point positions
+			int[][] points = Functions.readComplex(image);
+			
+			// get edges from points
+			int[][][] edges = Functions.defineEdges(points);
+			
+			// normalize point coordinates of edges ([0, 1])
+			double[][][] nEdges = Functions.normalize(edges);
 			
 			ArrayList<double[][][]> bars = new ArrayList<double[][][]>();
 			for (double kot=0; kot<2*Math.PI; kot+=Math.PI/2) {
-				edges = Functions.Rotate(edges, kot);
-				Filter filter = Functions.GenerateFilter(edges, numberOfStages);
+				nEdges = Functions.rotate(nEdges, kot);
+				Filter filter = Functions.generateFilter(nEdges, numberOfStages);
 				double[][][] temp = Functions.GenerateBarcode(filter); 
 				bars.add(temp); //TODO
 			}
 			char crka = Functions.CompareBarcode(bars, idealneCrke); //TODO
 			if (crka == 'i' || crka == 'j' || crka == 'l') { //TODO katere crke?
 				for (double kot=Math.PI/4; kot<2*Math.PI; kot+=Math.PI/2) {
-					edges = Functions.Rotate(edges, kot);
-					Filter filter = Functions.GenerateFilter(edges, numberOfStages);
+					nEdges = Functions.rotate(nEdges, kot);
+					Filter filter = Functions.generateFilter(nEdges, numberOfStages);
 					bars.add(Functions.GenerateBarcode(filter));
 				}
 				crka = Functions.CompareBarcode2((double[][][][]) bars.toArray(), idealneCrke); //TODO
