@@ -13,7 +13,7 @@ import edu.stanford.math.plex.PersistenceInterval.Float;
 /**
  * @author Jernej Jerin
  * @author Tadej Vodopivec
- * @author Marija Ðurðeviæ
+ * @author Marija ï¿½urï¿½eviï¿½
  * 
  */
 public class Functions {
@@ -47,14 +47,7 @@ public class Functions {
 			final boolean hasAlphaChannel = image.getAlphaRaster() != null;
 
 			int[][] result = new int[height][width];
-			int pixelLength;
-			if (hasAlphaChannel) {
-				pixelLength = 4;
-			}
-			else {
-				pixelLength = 3;
-			}
-			for (int pixel = 0, row = 0, col = 0; pixel < pixels.length; pixel += 4) {
+			for (int pixel = 0, row = 0, col = 0; pixel < pixels.length; pixel += hasAlphaChannel?4:3) {
 				// the image has alpha channel before rgb that is why we need a
 				// step of size 4!
 				int r = (pixels[pixel + 1] >> 16) & 0xFF;
