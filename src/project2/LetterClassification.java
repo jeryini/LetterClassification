@@ -35,24 +35,42 @@ public class LetterClassification {
 			int[][] points = Functions.readComplex(image);
 			
 			// get edges from points
+			/* TODO: test case for A:
+			 * int[][][] edges = new int[][][]{
+			 * 	{{2, 2}, {3, 3}},
+			 *	{{4, 4}, {5, 5}},
+			 *	{{6, 6}, {7, 7}},
+			 *	{{8, 8}, {9, 9}},
+			 *	{{10, 10}, {11, 11}},
+			 *	{{12, 12}, {13, 13}},
+			 *	{{14, 12}, {15, 11}},
+			 *
+			 *	{{8, 9}, {8, 10}},
+			 *	{{8, 11}, {8, 12}},
+			 * }
+			 */
 			int[][][] edges = Functions.defineEdges(points);
 			
 			// normalize point coordinates of edges ([0, 1])
 			double[][][] nEdges = Functions.normalize(edges);
 			
+			// sink simplical complex under water under different angles
 			ArrayList<double[][][]> bars = new ArrayList<double[][][]>();
-			for (double kot=0; kot<2*Math.PI; kot+=Math.PI/2) {
-				nEdges = Functions.rotate(nEdges, kot);
+			
+			// rotate every 90 degree
+			for (double angle = 0; angle < 2 * Math.PI; angle += Math.PI / 2) {
+				nEdges = Functions.rotate(nEdges, angle);
 				Filter filter = Functions.generateFilter(nEdges, numberOfStages);
-				double[][][] temp = Functions.GenerateBarcode(filter); 
-				bars.add(temp); //TODO
+				double[][][] barCode = Functions.generateBarcode(filter); 
+				bars.add(barCode);
 			}
+			
 			char crka = Functions.CompareBarcode(bars, idealneCrke); //TODO
 			if (crka == 'i' || crka == 'j' || crka == 'l') { //TODO katere crke?
 				for (double kot=Math.PI/4; kot<2*Math.PI; kot+=Math.PI/2) {
 					nEdges = Functions.rotate(nEdges, kot);
 					Filter filter = Functions.generateFilter(nEdges, numberOfStages);
-					bars.add(Functions.GenerateBarcode(filter));
+					bars.add(Functions.generateBarcode(filter));
 				}
 				crka = Functions.CompareBarcode2((double[][][][]) bars.toArray(), idealneCrke); //TODO
 			}

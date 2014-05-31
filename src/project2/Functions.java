@@ -260,41 +260,54 @@ public class Functions {
 
 	/**
 	 * Discretize the edges on the number of given stages. The points in edges
-	 * are normalized (i.e. between 0 and 1).
+	 * are normalized (i.e. between 0 and 1) and ordered so the firs point in
+	 * edge is smaller in y value than the second point in edge.
 	 * 
 	 * @param edges
 	 * @param numberOfStages
 	 * @return
 	 */
 	public static Filter generateFilter(double edges[][][], int numberOfStages) {
-		// TODO: include points lying below or on the high border and above low
-		// border (not on low border)
-		// TODO: include only edges that have both points on or below high
-		// border and above
-		// TODO: Map -> key values, key -> tocka, value -> enolicna vrednost
 		HashMap<double[], Integer> dict = new HashMap<double[], Integer>();
 		Filter filter = new Filter(numberOfStages);
 
 		int counter = 1;
 		for (double[][] edge : edges) {
-			for (double[] tocka : edge) {
-				if (!dict.containsKey(tocka)) {
-					dict.put(tocka, counter++);
+			for (double[] point : edge) {
+				// value for our key (point) is abstract point (integer)
+				if (!dict.containsKey(point)) {
+					dict.put(point, counter++);
 				}
-				filter.stages[(int) (numberOfStages * tocka[1])].points
-						.add(dict.get(tocka));
+
+				// add abstract value of point to appropriate stage regarding
+				// the y value of point
+				filter.stages[(int) (numberOfStages * point[1])].points
+						.add(dict.get(point));
 			}
+
+			// add abstract edge (consisting of two abstract points) to stage
+			// according to the largest of y value of two points
 			filter.stages[(int) (numberOfStages * Math.max(edge[0][1],
 					edge[1][1]))].edges.add(new Integer[] { dict.get(edge[0]),
 					dict.get(edge[1]) });
 		}
+
 		return filter;
 	}
 
-	public static double[][][] GenerateBarcode(Filter filter) {
+	/**
+	 * Generate barcode.
+	 * 
+	 * @param filter
+	 * @return
+	 */
+	public static double[][][] generateBarcode(Filter filter) {
+		// complex stream for barcode
 		ExplicitStream complex = new ExplicitStream();
-		int numberOfStages = filter.stages.length;
-		for (int i = 0; i < filter.stages.length; i++) {
+		int numberOfStages = filter.numberOfStages;
+
+		// iterate over all stages of filter
+		for (int i = 0; i < numberOfStages; i++) {
 			Stage stage = filter.stages[i];
 
 			complex.add(new double[][] {
@@ -310,22 +323,20 @@ public class Functions {
 					numberOfStages + 1, numberOfStages + 1, numberOfStages + 1,
 					numberOfStages + 1 });
 
-			for (Iterator<Integer> it = stage.points.iterator(); it.hasNext();) {
-				int f = it.next();
-				complex.add(new double[] { f }, i);
-			}
+			for (Integer point : stage.points)
+				// add abstract point and stage number
+				complex.add(new double[] { point }, i);
 			/*
 			 * Integer[] points = stage.points.toArray(new
 			 * Integer[stage.points.size()]); if (points.length>0) { int[] pts =
 			 * new int[points.length]; for (int j = 0; j < points.length; j++) {
 			 * pts[j] = points[j]; } complex.add(pts, i); }
 			 */
-			for (Iterator<Integer[]> it = stage.edges.iterator(); it.hasNext();) {
-				Integer[] f = it.next();
+			for (Integer[] edge : stage.edges)
+				// add edge to complex
 				complex.add(
-						new double[][] { { f[0].doubleValue(),
-								f[1].doubleValue() } }, new double[] { i });
-			}
+						new double[][] { { edge[0].doubleValue(),
+								edge[1].doubleValue() } }, new double[] { i });
 			/*
 			 * Integer[][] edges = stage.edges.toArray(new
 			 * Integer[stage.points.size()][2]); if (edges.length > 0) { int[][]

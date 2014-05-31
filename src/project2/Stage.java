@@ -7,7 +7,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @author Jernej
+ * @author Jernej Jerin
+ * @author Tadej Vodopivec
  *
  */
 public class Stage {
