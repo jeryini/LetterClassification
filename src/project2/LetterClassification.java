@@ -9,7 +9,7 @@ import java.util.ArrayList;
  *
  */
 public class LetterClassification {
-	private static int numberOfStages = 100;
+	private static int numberOfStages = 10;
 	
 	static double[][][][][] idealneCrke = {/*(A, B, C, D, E, F, G, H, I, J, K, L), (0, 90, 180, 270, 45, 135, 225, 315), (beti0, beti1), (zaporedna stevilka 0, 1, 2, 3, ...), (zacetek, konec)*/
 			/* A */ {/*gor*/{{{15, 100}, {15, 50}}, {{85, 100}}}, /*desno*/ {{{15, 100}}, {{70, 100}}}, /*dol*/ {{{15, 100}}, {{50, 100}}}, /*levo*/ {{{15, 100}}, {{70, 100}}}, /*ostali*/ {}, {}, {}, {}},
@@ -33,31 +33,31 @@ public class LetterClassification {
 		if (image != null) {
 			// get point positions
 			// test case for character A (points):
-			int[][] points = new int[][] {
-					{2, 2}, 
-					{3, 3},
-					{4, 4},
-					{5, 5},
-					{6, 6},
-					{7, 7},
-					{8, 8},
-					{9, 7},
-					{10, 6},
-					{11, 5},
-					{12, 4},
-					{13, 3},
-					{14, 2},
-					{6, 5},
-					{7, 5},
-					{8, 5},
-					{9, 5},
-					{10, 5}
-			};
-//			int[][] points = Functions.readComplex(image);
+//			int[][] points = new int[][] {
+//					{2, 2}, 
+//					{3, 3},
+//					{4, 4},
+//					{5, 5},
+//					{6, 6},
+//					{7, 7},
+//					{8, 8},
+//					{9, 7},
+//					{10, 6},
+//					{11, 5},
+//					{12, 4},
+//					{13, 3},
+//					{14, 2},
+//					{6, 5},
+//					{7, 5},
+//					{8, 5},
+//					{9, 5},
+//					{10, 5}
+//			};
+			int[][] points = Functions.readComplex(image);
 			
 			// get edges from points
 			// test case for character A (edges):
-			/*int[][][] edges = new int[][][] {
+			int[][][] edges = new int[][][] {
 			  	{{2, 2}, {3, 3}},
 			  	{{3, 3}, {4, 4}},
 			 	{{4, 4}, {5, 5}},
@@ -76,9 +76,9 @@ public class LetterClassification {
 			 	{{8, 5}, {9, 5}},
 			 	{{9, 5}, {10, 5}},
 			 	{{10, 5}, {11, 5}}
-			};*/
+			};
 			 
-			int[][][] edges = Functions.defineEdges(points);
+//			int[][][] edges = Functions.defineEdges(points);
 			
 			// normalize point coordinates of edges ([0, 1])
 			double[][][] nEdges = Functions.normalize(edges);
@@ -90,7 +90,8 @@ public class LetterClassification {
 			for (double angle = 0; angle < 2 * Math.PI; angle += Math.PI / 2) {
 				nEdges = Functions.rotate(nEdges, angle);
 				Filter filter = Functions.generateFilter(nEdges, numberOfStages);
-				double[][][] barCode = Functions.generateBarcode(filter); 
+				double[][][] barCode = Functions.generateBarcode(filter);
+				
 				bars.add(barCode);
 			}
 			
@@ -105,16 +106,5 @@ public class LetterClassification {
 			}
 			System.out.println("'" + crka + "'");
 		}
-		
-		
-		
-		/*
-		double[][][] edges2 = { { { 5, 5 }, { 0, 10 } }, { { 5, 0 }, { 4, 6 } }};
-		edges2 = Functions.Rotate(edges2, Math.PI / 4);
-
-		for (int i = 0; i < edges2[0].length; i++) {
-			System.out.println("(" + edges2[i][0][0] + ", " + edges2[i][0][1] + ")"
-					+ ", " + "(" + edges2[i][1][0] + ", " + edges2[i][1][1] + ")");
-		}*/
 	}
 }

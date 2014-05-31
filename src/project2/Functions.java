@@ -8,8 +8,27 @@ import java.util.*;
 import javax.imageio.ImageIO;
 
 import edu.stanford.math.plex.*;
+import edu.stanford.math.plex.PersistenceInterval.Float;
 
+/**
+ * @author Jernej Jerin
+ * @author Tadej Vodopivec
+ * @author Marija Ðurðeviæ
+ * 
+ */
 public class Functions {
+
+	public static void main(String[] args) {
+		// test for function rotate
+		double[][][] edges = { { { 5, 5 }, { 0, 10 } }, { { 5, 0 }, { 4, 6 } } };
+		edges = rotate(edges, Math.PI / 4);
+
+		for (int i = 0; i < edges[0].length; i++) {
+			System.out.println("(" + edges[i][0][0] + ", " + edges[i][0][1]
+					+ ")" + ", " + "(" + edges[i][1][0] + ", " + edges[i][1][1]
+					+ ")");
+		}
+	}
 
 	/**
 	 * Reads picture and returns array of 1's and 0's, where value 0 represents
@@ -268,28 +287,29 @@ public class Functions {
 	 * @return
 	 */
 	public static Filter generateFilter(double edges[][][], int numberOfStages) {
-		HashMap<double[], Integer> dict = new HashMap<double[], Integer>();
+		HashMap<Integer, Integer> dict = new HashMap<Integer, Integer>();
 		Filter filter = new Filter(numberOfStages);
 
 		int counter = 1;
 		for (double[][] edge : edges) {
 			for (double[] point : edge) {
 				// value for our key (point) is abstract point (integer)
-				if (!dict.containsKey(point)) {
-					dict.put(point, counter++);
+				if (!dict.containsKey(Arrays.hashCode(point))) {
+					dict.put(Arrays.hashCode(point), counter++);
 				}
 
 				// add abstract value of point to appropriate stage regarding
-				// the y value of point
+				// the y value of point. The bigger the y value, higher the
+				// stage
 				filter.stages[(int) (numberOfStages * point[1])].points
-						.add(dict.get(point));
+						.add(dict.get(Arrays.hashCode(point)));
 			}
 
 			// add abstract edge (consisting of two abstract points) to stage
 			// according to the largest of y value of two points
 			filter.stages[(int) (numberOfStages * Math.max(edge[0][1],
-					edge[1][1]))].edges.add(new Integer[] { dict.get(edge[0]),
-					dict.get(edge[1]) });
+					edge[1][1]))].edges.add(new Integer[] { dict.get(Arrays.hashCode(edge[0])),
+					dict.get(Arrays.hashCode(edge[1])) });
 		}
 
 		return filter;
@@ -306,57 +326,38 @@ public class Functions {
 		ExplicitStream complex = new ExplicitStream();
 		int numberOfStages = filter.numberOfStages;
 
+		complex.add(new double[][] {
+				{ Integer.MAX_VALUE - 2 },
+				{ Integer.MAX_VALUE - 1 },
+				{ Integer.MAX_VALUE },
+				{ Integer.MAX_VALUE - 2, Integer.MAX_VALUE - 1 },
+				{ Integer.MAX_VALUE - 2, Integer.MAX_VALUE },
+				{ Integer.MAX_VALUE - 1, Integer.MAX_VALUE },
+				{ Integer.MAX_VALUE - 2, Integer.MAX_VALUE - 1,
+						Integer.MAX_VALUE } }, new double[] {
+				numberOfStages + 1, numberOfStages + 1, numberOfStages + 1,
+				numberOfStages + 1, numberOfStages + 1, numberOfStages + 1,
+				numberOfStages + 1 });
+
 		// iterate over all stages of filter
 		for (int i = 0; i < numberOfStages; i++) {
 			Stage stage = filter.stages[i];
 
-			complex.add(new double[][] {
-					{ Integer.MAX_VALUE - 2 },
-					{ Integer.MAX_VALUE - 1 },
-					{ Integer.MAX_VALUE },
-					{ Integer.MAX_VALUE - 2, Integer.MAX_VALUE - 1 },
-					{ Integer.MAX_VALUE - 2, Integer.MAX_VALUE },
-					{ Integer.MAX_VALUE - 1, Integer.MAX_VALUE },
-					{ Integer.MAX_VALUE - 2, Integer.MAX_VALUE - 1,
-							Integer.MAX_VALUE } }, new double[] {
-					numberOfStages + 1, numberOfStages + 1, numberOfStages + 1,
-					numberOfStages + 1, numberOfStages + 1, numberOfStages + 1,
-					numberOfStages + 1 });
-
 			for (Integer point : stage.points)
-				// add abstract point and stage number
+				// add abstract point and stage number as parameter
 				complex.add(new double[] { point }, i);
-			/*
-			 * Integer[] points = stage.points.toArray(new
-			 * Integer[stage.points.size()]); if (points.length>0) { int[] pts =
-			 * new int[points.length]; for (int j = 0; j < points.length; j++) {
-			 * pts[j] = points[j]; } complex.add(pts, i); }
-			 */
+
 			for (Integer[] edge : stage.edges)
-				// add edge to complex
+				// add abstract edge to complex
 				complex.add(
 						new double[][] { { edge[0].doubleValue(),
 								edge[1].doubleValue() } }, new double[] { i });
-			/*
-			 * Integer[][] edges = stage.edges.toArray(new
-			 * Integer[stage.points.size()][2]); if (edges.length > 0) { int[][]
-			 * eds = new int[edges.length][2]; for (int j = 0; j < edges.length;
-			 * j++) { eds[j][0] = edges[j][0]; eds[j][1] = edges[j][1]; }
-			 * complex.add(eds, new double[]{i, i}); }
-			 */
 		}
 
 		complex.close();
-		Persistence persistence = Plex.Persistence();
-		PersistenceInterval.Float[] intervals = persistence
-				.computeIntervals(complex);
+		Float[] intervals = Plex.Persistence().computeIntervals(complex);
+		Plex.plot(intervals, "Barcode plot", numberOfStages);
 
-		/*
-		 * for (int i = 0; i < arrayOfBarcodes.length; i++) { for (int j = 0; j
-		 * < arrayOfBarcodes[i].length; j++) { for (int k = 0; k <
-		 * arrayOfBarcodes[i][j].length; k++) { System.out.println("betti-" + i
-		 * + ": bar:" + j + " " + arrayOfBarcodes[i][j][k]); } } }
-		 */
 		return printable_intervals(intervals);
 	}
 
