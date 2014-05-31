@@ -44,8 +44,16 @@ public class Functions {
 					.getDataBuffer()).getData();
 			final int width = image.getWidth();
 			final int height = image.getHeight();
+			final boolean hasAlphaChannel = image.getAlphaRaster() != null;
 
 			int[][] result = new int[height][width];
+			int pixelLength;
+			if (hasAlphaChannel) {
+				pixelLength = 4;
+			}
+			else {
+				pixelLength = 3;
+			}
 			for (int pixel = 0, row = 0, col = 0; pixel < pixels.length; pixel += 4) {
 				// the image has alpha channel before rgb that is why we need a
 				// step of size 4!
