@@ -51,9 +51,9 @@ public class Functions {
 					: 3) {
 				// the image has alpha channel before rgb that is why we need a
 				// step of size 4!
-				int r = (pixels[pixel + 1] >> 16) & 0xFF;
-				int g = (pixels[pixel + 2] >> 8) & 0xFF;
-				int b = (pixels[pixel + 3] & 0xFF);
+				int r = (pixels[pixel + (hasAlphaChannel ? 1 : 0)] >> 16) & 0xFF;
+				int g = (pixels[pixel + (hasAlphaChannel ? 2 : 1)] >> 8) & 0xFF;
+				int b = (pixels[pixel + (hasAlphaChannel ? 3 : 2)] & 0xFF);
 
 				// if the pixel is white then 0, otherwise 1
 				result[row][col] = 1 - (r + g + b) / (3 * 128);
@@ -359,7 +359,7 @@ public class Functions {
 
 		complex.close();
 		Float[] intervals = Plex.Persistence().computeIntervals(complex);
-		Plex.plot(intervals, "Barcode plot", numberOfStages);
+//		Plex.plot(intervals, "Barcode plot", numberOfStages);
 
 		return printable_intervals(intervals);
 	}

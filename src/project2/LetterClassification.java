@@ -72,47 +72,47 @@ public class LetterClassification {
 
 	public static void main(String[] args) {
 		// read picture from file
-		int[][] image = Functions.readPicture("./letters/a.png");
+		int[][] image = Functions.readPicture("./letters/a_ideal.png");
 
 		if (image != null) {
 			// get point positions
 			// test case for character A (points):
-			// int[][] points = new int[][] {
-			// {2, 2},
-			// {3, 3},
-			// {4, 4},
-			// {5, 5},
-			// {6, 6},
-			// {7, 7},
-			// {8, 8},
-			// {9, 7},
-			// {10, 6},
-			// {11, 5},
-			// {12, 4},
-			// {13, 3},
-			// {14, 2},
-			// {6, 5},
-			// {7, 5},
-			// {8, 5},
-			// {9, 5},
-			// {10, 5}
-			// };
+//			 int[][] points = new int[][] {
+//			 {2, 2},
+//			 {3, 3},
+//			 {4, 4},
+//			 {5, 5},
+//			 {6, 6},
+//			 {7, 7},
+//			 {8, 8},
+//			 {9, 7},
+//			 {10, 6},
+//			 {11, 5},
+//			 {12, 4},
+//			 {13, 3},
+//			 {14, 2},
+//			 {6, 5},
+//			 {7, 5},
+//			 {8, 5},
+//			 {9, 5},
+//			 {10, 5}
+//			 };
 			int[][] points = Functions.readComplex(image);
 
 			// get edges from points
 			// test case for character A (edges):
-			int[][][] edges = new int[][][] { { { 2, 2 }, { 3, 3 } },
-					{ { 3, 3 }, { 4, 4 } }, { { 4, 4 }, { 5, 5 } },
-					{ { 5, 5 }, { 6, 6 } }, { { 6, 6 }, { 7, 7 } },
-					{ { 7, 7 }, { 8, 8 } }, { { 8, 8 }, { 9, 7 } },
-					{ { 9, 7 }, { 10, 6 } }, { { 10, 6 }, { 11, 5 } },
-					{ { 11, 5 }, { 12, 4 } }, { { 12, 4 }, { 13, 3 } },
-					{ { 13, 3 }, { 14, 2 } }, { { 5, 5 }, { 6, 5 } },
-					{ { 6, 5 }, { 7, 5 } }, { { 7, 5 }, { 8, 5 } },
-					{ { 8, 5 }, { 9, 5 } }, { { 9, 5 }, { 10, 5 } },
-					{ { 10, 5 }, { 11, 5 } } };
+//			int[][][] edges = new int[][][] { { { 2, 2 }, { 3, 3 } },
+//					{ { 3, 3 }, { 4, 4 } }, { { 4, 4 }, { 5, 5 } },
+//					{ { 5, 5 }, { 6, 6 } }, { { 6, 6 }, { 7, 7 } },
+//					{ { 7, 7 }, { 8, 8 } }, { { 8, 8 }, { 9, 7 } },
+//					{ { 9, 7 }, { 10, 6 } }, { { 10, 6 }, { 11, 5 } },
+//					{ { 11, 5 }, { 12, 4 } }, { { 12, 4 }, { 13, 3 } },
+//					{ { 13, 3 }, { 14, 2 } }, { { 5, 5 }, { 6, 5 } },
+//					{ { 6, 5 }, { 7, 5 } }, { { 7, 5 }, { 8, 5 } },
+//					{ { 8, 5 }, { 9, 5 } }, { { 9, 5 }, { 10, 5 } },
+//					{ { 10, 5 }, { 11, 5 } } };
 
-			// int[][][] edges = Functions.defineEdges(points);
+			int[][][] edges = Functions.defineEdges(points);
 
 			// normalize point coordinates of edges ([0, 1])
 			double[][][] nEdges = Functions.normalize(edges);
