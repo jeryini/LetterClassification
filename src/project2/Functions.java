@@ -189,6 +189,7 @@ public class Functions {
 			}
 		}
 
+		double maxValue = (max[0] > max[1]) ? max[0] : max[1];
 		double[] originalSize = new double[] { (max[0] - min[0]),
 				(max[1] - min[1]) };
 
@@ -217,9 +218,9 @@ public class Functions {
 			}
 			for (int tocka = 0; tocka < 2; tocka++) {
 				for (int koordinata = 0; koordinata < 2; koordinata++) {
-					nEdges[edge][tocka][koordinata] = border
-							+ offset[koordinata] + (1 - 2 * border)
-							* edges[edge][tocka][koordinata] / size;
+					 nEdges[edge][tocka][koordinata] = border
+					 + offset[koordinata] + (1 - 2 * border)
+					 * edges[edge][tocka][koordinata] / maxValue;
 				}
 			}
 		}
@@ -247,16 +248,19 @@ public class Functions {
 	 */
 	public static double[][][] rotate(double[][][] edges, double angle,
 			double[] originPoint) {
+		// we need to return new array
+		double[][][] edgesR = new double[edges.length][2][2];
+		
 		// iterate over all edges
 		for (int i = 0; i < edges.length; i++) {
 			// rotate first point in edge
 			double[] newPoint1 = rotatePoint(edges[i][0], originPoint, angle);
 			double[] newPoint2 = rotatePoint(edges[i][1], originPoint, angle);
 
-			edges[i][0] = newPoint1;
-			edges[i][1] = newPoint2;
+			edgesR[i][0] = newPoint1;
+			edgesR[i][1] = newPoint2;
 		}
-		return edges;
+		return edgesR;
 	}
 
 	private static double[] rotatePoint(double[] point, double[] originPoint,
@@ -359,7 +363,7 @@ public class Functions {
 
 		complex.close();
 		Float[] intervals = Plex.Persistence().computeIntervals(complex);
-//		Plex.plot(intervals, "Barcode plot", numberOfStages);
+		Plex.plot(intervals, "Barcode plot", numberOfStages);
 
 		return printable_intervals(intervals);
 	}

@@ -14,7 +14,7 @@ import org.math.plot.Plot2DPanel;
  * 
  */
 public class LetterClassification {
-	private static int numberOfStages = 10;
+	private static int numberOfStages = 100;
 
 	static double[][][][][] idealneCrke = {/*
 											 * (A, B, C, D, E, F, G, H, I, J, K,
@@ -122,12 +122,12 @@ public class LetterClassification {
 
 			// rotate every 90 degree
 			for (double angle = 0; angle < 2 * Math.PI; angle += Math.PI / 2) {
-				nEdges = Functions.rotate(nEdges, angle);
+				double[][][] nEdgesR = Functions.rotate(nEdges, angle);
 
 				// plot the edges for the given angle
-				plotEdges(nEdges, angle);
+				plotEdges(nEdgesR, angle);
 				Filter filter = Functions
-						.generateFilter(nEdges, numberOfStages);
+						.generateFilter(nEdgesR, numberOfStages);
 				double[][][] barCode = Functions.generateBarcode(filter);
 
 				bars.add(barCode);
