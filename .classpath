@@ -3,5 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="javaplex-4.2.0.jar" sourcepath="C:/Users/Jernej/Desktop/src"/>
+	<classpathentry kind="lib" path="C:/Users/Jernej/Documents/University/Magistrski program/Computational topology (Racunska topologija)/Seminar work/Project 2/LetterClassification/jmathplot.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

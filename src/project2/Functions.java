@@ -47,7 +47,8 @@ public class Functions {
 			final boolean hasAlphaChannel = image.getAlphaRaster() != null;
 
 			int[][] result = new int[height][width];
-			for (int pixel = 0, row = 0, col = 0; pixel < pixels.length; pixel += hasAlphaChannel?4:3) {
+			for (int pixel = 0, row = 0, col = 0; pixel < pixels.length; pixel += hasAlphaChannel ? 4
+					: 3) {
 				// the image has alpha channel before rgb that is why we need a
 				// step of size 4!
 				int r = (pixels[pixel + 1] >> 16) & 0xFF;
@@ -226,7 +227,8 @@ public class Functions {
 	}
 
 	/**
-	 * Default origin point (50, 50).
+	 * Default origin point (0.5, 0.5). Positive angle means counter clockwise
+	 * rotation and negative angle means counter clockwise rotation.
 	 * 
 	 * @param edges
 	 * @param angle
@@ -308,7 +310,8 @@ public class Functions {
 			// add abstract edge (consisting of two abstract points) to stage
 			// according to the largest of y value of two points
 			filter.stages[(int) (numberOfStages * Math.max(edge[0][1],
-					edge[1][1]))].edges.add(new Integer[] { dict.get(Arrays.hashCode(edge[0])),
+					edge[1][1]))].edges.add(new Integer[] {
+					dict.get(Arrays.hashCode(edge[0])),
 					dict.get(Arrays.hashCode(edge[1])) });
 		}
 
