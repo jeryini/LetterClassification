@@ -246,7 +246,7 @@ public class Functions {
 	public static double[][][] rotate(double[][][] edges, double angle,
 			double[] originPoint) {
 		// iterate over all edges
-		for (int i = 0; i < edges[0].length; i++) {
+		for (int i = 0; i < edges.length; i++) {
 			// rotate first point in edge
 			double[] newPoint1 = rotatePoint(edges[i][0], originPoint, angle);
 			double[] newPoint2 = rotatePoint(edges[i][1], originPoint, angle);
@@ -295,9 +295,8 @@ public class Functions {
 		for (double[][] edge : edges) {
 			for (double[] point : edge) {
 				// value for our key (point) is abstract point (integer)
-				if (!dict.containsKey(Arrays.hashCode(point))) {
+				if (!dict.containsKey(Arrays.hashCode(point)))
 					dict.put(Arrays.hashCode(point), counter++);
-				}
 
 				// add abstract value of point to appropriate stage regarding
 				// the y value of point. The bigger the y value, higher the
