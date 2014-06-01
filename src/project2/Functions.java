@@ -86,7 +86,7 @@ public class Functions {
 			for (int j = 0; j < height; j++) {
 				if (image[i][j] == 1) {
 					// add point x and y position to array
-					points.add(new int[] { i, j });
+					points.add(new int[] { j, height - i });
 				}
 			}
 		}
