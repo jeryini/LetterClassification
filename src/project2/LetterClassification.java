@@ -72,7 +72,7 @@ public class LetterClassification {
 
 	public static void main(String[] args) {
 		// read picture from file
-		int[][] image = Functions.readPicture("./letters/a_ideal.png");
+		int[][] image = Functions.readPicture("./letters/a.png");
 
 		if (image != null) {
 			// get point positions
@@ -158,7 +158,8 @@ public class LetterClassification {
 	private static void plotEdges(double[][][] nEdges, double angle) {
 		// create your PlotPanel (you can use it as a JPanel)
 		Plot2DPanel plot = new Plot2DPanel();
-
+		plot.addLinePlot("Letter with angle " + angle, new Color(0, 0, 0), new double[][] {{0,0}, {0,1}});
+		plot.addLinePlot("Letter with angle " + angle, new Color(0, 0, 0), new double[][] {{0,0}, {1,0}});
 		for (double[][] nEdge : nEdges) {
 			plot.addLinePlot("Letter with angle " + angle, new Color(0, 0, 0),
 					nEdge);

@@ -17,7 +17,7 @@ import edu.stanford.math.plex.PersistenceInterval.Float;
  * 
  */
 public class Functions {
-
+/*
 	public static void main(String[] args) {
 		// test for function rotate
 		double[][][] edges = { { { 5, 5 }, { 0, 10 } }, { { 5, 0 }, { 4, 6 } } };
@@ -29,7 +29,7 @@ public class Functions {
 					+ ")");
 		}
 	}
-
+*/
 	/**
 	 * Reads picture and returns array of 1's and 0's, where value 0 represents
 	 * white pixel and value 1 any other color.
@@ -190,8 +190,8 @@ public class Functions {
 		}
 
 		double maxValue = (max[0] > max[1]) ? max[0] : max[1];
-		double[] originalSize = new double[] { (max[0] - min[0]),
-				(max[1] - min[1]) };
+		double minValue = (min[0] < min[1]) ? min[0] : min[1];
+		double[] originalSize = new double[] { (max[0] - min[0]), (max[1] - min[1]) };
 
 		double size;
 		double[] offset;
@@ -199,28 +199,23 @@ public class Functions {
 		// check if length of x value is greater than the length of y value
 		if (originalSize[0] > originalSize[1]) {
 			size = originalSize[0];
-			offset = new double[] { 0, (size - originalSize[1]) / 2 / size };
+			offset = new double[] { 0, (originalSize[0] - originalSize[1]) / 2 / size };
 		} else {
 			size = originalSize[1];
-			offset = new double[] { (size - originalSize[0]) / 2 / size, 0 };
+			offset = new double[] { (originalSize[1] - originalSize[0]) / 2 / size, 0 };
 		}
 
 		// now we need double values
 		double[][][] nEdges = new double[edges.length][2][2];
 		for (int edge = 0; edge < edges.length; edge++) {
-			if (edges[edge][0][1] > edges[edge][1][1]) { // ce je prva tocka
-															// visja od druge,
-															// zamenjaj vrstni
-															// red
+			if (edges[edge][0][1] > edges[edge][1][1]) { // ce je prva tocka visja od druge, zamenjaj vrstni red
 				int[] point = edges[edge][0];
 				edges[edge][0] = edges[edge][1];
 				edges[edge][1] = point;
 			}
 			for (int tocka = 0; tocka < 2; tocka++) {
 				for (int koordinata = 0; koordinata < 2; koordinata++) {
-					 nEdges[edge][tocka][koordinata] = border
-					 + offset[koordinata] + (1 - 2 * border)
-					 * edges[edge][tocka][koordinata] / maxValue;
+					 nEdges[edge][tocka][koordinata] = border + offset[koordinata] + (1 - 2*border) * (edges[edge][tocka][koordinata]-min[koordinata]) / size;
 				}
 			}
 		}
