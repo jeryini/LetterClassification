@@ -17,19 +17,15 @@ import edu.stanford.math.plex.PersistenceInterval.Float;
  * 
  */
 public class Functions {
-/*
-	public static void main(String[] args) {
-		// test for function rotate
-		double[][][] edges = { { { 5, 5 }, { 0, 10 } }, { { 5, 0 }, { 4, 6 } } };
-		edges = rotate(edges, Math.PI / 4);
-
-		for (int i = 0; i < edges[0].length; i++) {
-			System.out.println("(" + edges[i][0][0] + ", " + edges[i][0][1]
-					+ ")" + ", " + "(" + edges[i][1][0] + ", " + edges[i][1][1]
-					+ ")");
-		}
-	}
-*/
+	/*
+	 * public static void main(String[] args) { // test for function rotate
+	 * double[][][] edges = { { { 5, 5 }, { 0, 10 } }, { { 5, 0 }, { 4, 6 } } };
+	 * edges = rotate(edges, Math.PI / 4);
+	 * 
+	 * for (int i = 0; i < edges[0].length; i++) { System.out.println("(" +
+	 * edges[i][0][0] + ", " + edges[i][0][1] + ")" + ", " + "(" +
+	 * edges[i][1][0] + ", " + edges[i][1][1] + ")"); } }
+	 */
 	/**
 	 * Reads picture and returns array of 1's and 0's, where value 0 represents
 	 * white pixel and value 1 any other color.
@@ -40,15 +36,13 @@ public class Functions {
 	public static int[][] readPicture(String file) {
 		try {
 			BufferedImage image = ImageIO.read(new File(file));
-			final byte[] pixels = ((DataBufferByte) image.getRaster()
-					.getDataBuffer()).getData();
+			final byte[] pixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
 			final int width = image.getWidth();
 			final int height = image.getHeight();
 			final boolean hasAlphaChannel = image.getAlphaRaster() != null;
 
 			int[][] result = new int[height][width];
-			for (int pixel = 0, row = 0, col = 0; pixel < pixels.length; pixel += hasAlphaChannel ? 4
-					: 3) {
+			for (int pixel = 0, row = 0, col = 0; pixel < pixels.length; pixel += hasAlphaChannel ? 4 : 3) {
 				// the image has alpha channel before rgb that is why we need a
 				// step of size 4!
 				int r = (pixels[pixel + (hasAlphaChannel ? 1 : 0)] >> 16) & 0xFF;
@@ -106,7 +100,7 @@ public class Functions {
 	 * @return
 	 */
 	public static int[][][] defineEdges(int[][] points) {
-		return defineEdges(points, 1);
+		return defineEdges(points, 3);
 	}
 
 	/**
@@ -189,33 +183,34 @@ public class Functions {
 			}
 		}
 
-		double maxValue = (max[0] > max[1]) ? max[0] : max[1];
-		double minValue = (min[0] < min[1]) ? min[0] : min[1];
 		double[] originalSize = new double[] { (max[0] - min[0]), (max[1] - min[1]) };
 
 		double size;
-		double[] offset;
-
+		double[] offset = new double[] { 0, 0 };
+		double stretch[] = new double[] { 1, 1 };
 		// check if length of x value is greater than the length of y value
 		if (originalSize[0] > originalSize[1]) {
 			size = originalSize[0];
-			offset = new double[] { 0, (originalSize[0] - originalSize[1]) / 2 / size };
+			stretch[1] = originalSize[0] / originalSize[1];
 		} else {
 			size = originalSize[1];
-			offset = new double[] { (originalSize[1] - originalSize[0]) / 2 / size, 0 };
+			offset[0] = (1 - originalSize[0] / originalSize[1]) / 2;
 		}
 
 		// now we need double values
 		double[][][] nEdges = new double[edges.length][2][2];
 		for (int edge = 0; edge < edges.length; edge++) {
-			if (edges[edge][0][1] > edges[edge][1][1]) { // ce je prva tocka visja od druge, zamenjaj vrstni red
+			if (edges[edge][0][1] > edges[edge][1][1]) { // ce je prva tocka
+															// visja od druge,
+															// zamenjaj vrstni
+															// red
 				int[] point = edges[edge][0];
 				edges[edge][0] = edges[edge][1];
 				edges[edge][1] = point;
 			}
 			for (int tocka = 0; tocka < 2; tocka++) {
 				for (int koordinata = 0; koordinata < 2; koordinata++) {
-					 nEdges[edge][tocka][koordinata] = border + offset[koordinata] + (1 - 2*border) * (edges[edge][tocka][koordinata]-min[koordinata]) / size;
+					nEdges[edge][tocka][koordinata] = border + (1 - 2 * border) * (offset[koordinata] + (edges[edge][tocka][koordinata] - min[koordinata]) / size * stretch[koordinata]);
 				}
 			}
 		}
@@ -241,11 +236,10 @@ public class Functions {
 	 * @param angle
 	 * @return
 	 */
-	public static double[][][] rotate(double[][][] edges, double angle,
-			double[] originPoint) {
+	public static double[][][] rotate(double[][][] edges, double angle, double[] originPoint) {
 		// we need to return new array
 		double[][][] edgesR = new double[edges.length][2][2];
-		
+
 		// iterate over all edges
 		for (int i = 0; i < edges.length; i++) {
 			// rotate first point in edge
@@ -258,24 +252,15 @@ public class Functions {
 		return edgesR;
 	}
 
-	private static double[] rotatePoint(double[] point, double[] originPoint,
-			double angle) {
+	private static double[] rotatePoint(double[] point, double[] originPoint, double angle) {
 		double[] newPoint = new double[2];
 		double round = 100000;
 		// three steps
 		// 1. A translation that brings point 1 to the origin.
 		// 2. Rotation around the origin by the required angle.
 		// 3. A translation that brings point 1 back to its original position.
-		newPoint[0] = Math.round((originPoint[0] + (point[0] - originPoint[0])
-				* Math.cos(angle) - (point[1] - originPoint[1])
-				* Math.sin(angle))
-				* round)
-				/ round;
-		newPoint[1] = Math.round((originPoint[1] + (point[0] - originPoint[0])
-				* Math.sin(angle) + (point[1] - originPoint[1])
-				* Math.cos(angle))
-				* round)
-				/ round;
+		newPoint[0] = Math.round((originPoint[0] + (point[0] - originPoint[0]) * Math.cos(angle) - (point[1] - originPoint[1]) * Math.sin(angle)) * round) / round;
+		newPoint[1] = Math.round((originPoint[1] + (point[0] - originPoint[0]) * Math.sin(angle) + (point[1] - originPoint[1]) * Math.cos(angle)) * round) / round;
 		return newPoint;
 	}
 
@@ -302,16 +287,12 @@ public class Functions {
 				// add abstract value of point to appropriate stage regarding
 				// the y value of point. The bigger the y value, higher the
 				// stage
-				filter.stages[(int) (numberOfStages * point[1])].points
-						.add(dict.get(Arrays.hashCode(point)));
+				filter.stages[(int) (numberOfStages * point[1])].points.add(dict.get(Arrays.hashCode(point)));
 			}
 
 			// add abstract edge (consisting of two abstract points) to stage
 			// according to the largest of y value of two points
-			filter.stages[(int) (numberOfStages * Math.max(edge[0][1],
-					edge[1][1]))].edges.add(new Integer[] {
-					dict.get(Arrays.hashCode(edge[0])),
-					dict.get(Arrays.hashCode(edge[1])) });
+			filter.stages[(int) (numberOfStages * Math.max(edge[0][1], edge[1][1]))].edges.add(new Integer[] { dict.get(Arrays.hashCode(edge[0])), dict.get(Arrays.hashCode(edge[1])) });
 		}
 
 		return filter;
@@ -323,23 +304,14 @@ public class Functions {
 	 * @param filter
 	 * @return
 	 */
-	public static double[][][] generateBarcode(Filter filter) {
+	public static double[][][] generateBarcodes(Filter filter) {
 		// complex stream for barcode
 		ExplicitStream complex = new ExplicitStream();
 		int numberOfStages = filter.numberOfStages;
 
-		complex.add(new double[][] {
-				{ Integer.MAX_VALUE - 2 },
-				{ Integer.MAX_VALUE - 1 },
-				{ Integer.MAX_VALUE },
-				{ Integer.MAX_VALUE - 2, Integer.MAX_VALUE - 1 },
-				{ Integer.MAX_VALUE - 2, Integer.MAX_VALUE },
-				{ Integer.MAX_VALUE - 1, Integer.MAX_VALUE },
-				{ Integer.MAX_VALUE - 2, Integer.MAX_VALUE - 1,
-						Integer.MAX_VALUE } }, new double[] {
-				numberOfStages + 1, numberOfStages + 1, numberOfStages + 1,
-				numberOfStages + 1, numberOfStages + 1, numberOfStages + 1,
-				numberOfStages + 1 });
+		complex.add(new double[][] { { Integer.MAX_VALUE - 2 }, { Integer.MAX_VALUE - 1 }, { Integer.MAX_VALUE }, { Integer.MAX_VALUE - 2, Integer.MAX_VALUE - 1 },
+				{ Integer.MAX_VALUE - 2, Integer.MAX_VALUE }, { Integer.MAX_VALUE - 1, Integer.MAX_VALUE }, { Integer.MAX_VALUE - 2, Integer.MAX_VALUE - 1, Integer.MAX_VALUE } }, new double[] {
+				numberOfStages + 1, numberOfStages + 1, numberOfStages + 1, numberOfStages + 1, numberOfStages + 1, numberOfStages + 1, numberOfStages + 1 });
 
 		// iterate over all stages of filter
 		for (int i = 0; i < numberOfStages; i++) {
@@ -351,26 +323,18 @@ public class Functions {
 
 			for (Integer[] edge : stage.edges)
 				// add abstract edge to complex
-				complex.add(
-						new double[][] { { edge[0].doubleValue(),
-								edge[1].doubleValue() } }, new double[] { i });
+				complex.add(new double[][] { { edge[0].doubleValue(), edge[1].doubleValue() } }, new double[] { i });
 		}
 
 		complex.close();
 		Float[] intervals = Plex.Persistence().computeIntervals(complex);
-		Plex.plot(intervals, "Barcode plot", numberOfStages);
+		// Plex.plot(intervals, "Barcode plot", numberOfStages);
 
-		return printable_intervals(intervals);
-	}
-
-	protected static double[][][] printable_intervals(
-			PersistenceInterval[] intervals) {
 		int[] localObject = new int[0];
 		int j = -1;
 		for (int k = 0; k < intervals.length; k++) {
 			if (intervals[k].dimension >= localObject.length) {
-				int[] arrayOfInt = new int[Math.max(intervals[k].dimension + 1,
-						2 * localObject.length)];
+				int[] arrayOfInt = new int[Math.max(intervals[k].dimension + 1, 2 * localObject.length)];
 				for (int m = 0; m < localObject.length; m++) {
 					arrayOfInt[m] = localObject[m];
 				}
@@ -397,119 +361,171 @@ public class Functions {
 			Arrays.sort(arrayOfPersistenceInterval[j]);
 		}
 		for (int i = 0; i < arrayOfPersistenceInterval.length; i++) {
-			arrayOfbarcodes[i] = new double[arrayOfPersistenceInterval[i].length][];
-			for (j = 0; j < arrayOfPersistenceInterval[i].length; j++) {
-				arrayOfbarcodes[i][j] = arrayOfPersistenceInterval[i][j]
-						.toDouble();
+			arrayOfbarcodes[i] = new double[arrayOfPersistenceInterval[i].length - 1][];
+			for (j = 0; j < arrayOfPersistenceInterval[i].length - 1; j++) {
+				double[] bar = arrayOfPersistenceInterval[i][j].toDouble();
+				if (bar[0] != filter.numberOfStages + 1) {
+					arrayOfbarcodes[i][j] = arrayOfPersistenceInterval[i][j].toDouble();
+				}
+
 			}
 		}
 		return arrayOfbarcodes;
 	}
 
-	private static boolean CompareTwoBarcodes(double[][][] bars1,
-			double[][][] idealBars1) {
-		double[][][] bars = removBars(bars1);
-		double[][][] idealBars = removBars(idealBars1);
-		for (int i = 0; i < Math.min(idealBars.length, bars.length); i++) {
-			for (int j = 0; j < idealBars[i].length; j++) {
-				double zacetak = idealBars[i][j][0];
-				double konec = idealBars[i][j][1];
-				double start = bars[i][j][0];
-				double end = bars[i][j][1];
-				if (((0.9 * start < zacetak) && (zacetak < 1.1 * start))
-						&& ((0.9 * end < konec) && (konec < 1.1 * end))) {
-					// System.out.println("true");
-					return true;
-				}
+	public static double[][][] filterAndSortBarcodes(double[][][] barCodes, int minLength) {
+		ArrayList<double[][]> bars2 = new ArrayList<double[][]>();
+		for (int betti = 0; betti < 2; betti++) {
+			ArrayList<double[]> bars = new ArrayList<double[]>();
+			for (double[] a : barCodes[0]) {
+				if (a[1] - a[0] >= minLength)
+					bars.add(a);
 			}
+			double[][] out = new double[bars.size()][];
+			for (int i = 0; i < bars.size(); i++)
+				out[i] = bars.get(i);
+			bars2.add(out);
 		}
-		// System.out.println("false");
-		return false;
-	}
+		double[][][] bars2out = new double[2][][];
+		bars2out[0] = bars2.get(0);
+		bars2out[1] = bars2.get(1);
 
-	public static char CompareBarcode(ArrayList<double[][][]> bars,
-			double[][][][][] idealneCrke) {// TODO Marija
-		char detektovanaCrka = ' ';
-		for (int i = 0; i < idealneCrke.length; i++) {
-			double[][][][] crka = idealneCrke[i];
-			if ((CompareTwoBarcodes(bars.get(0), crka[0]))
-					&& (CompareTwoBarcodes(bars.get(1), crka[1]))
-					&& (CompareTwoBarcodes(bars.get(2), crka[2]))
-					&& (CompareTwoBarcodes(bars.get(3), crka[3]))) {
-				int index = i;
-				if (index == 0) {
-					detektovanaCrka = 'A';
-				} else if (index == 1) {
-					detektovanaCrka = 'B';
-				} else if (index == 2) {
-					detektovanaCrka = 'C';
-				} else if (index == 3) {
-					detektovanaCrka = 'D';
-				} else if (index == 4) {
-					detektovanaCrka = 'E';
-				} else if (index == 5) {
-					detektovanaCrka = 'F';
-				} else if (index == 6) {
-					detektovanaCrka = 'G';
-				} else if (index == 7) {
-					detektovanaCrka = 'H';
-				} else if (index == 8) {
-					detektovanaCrka = 'I';
-				} else if (index == 9) {
-					detektovanaCrka = 'J';
-				} else if (index == 10) {
-					detektovanaCrka = 'K';
-				} else if (index == 11) {
-					detektovanaCrka = 'L';
-				}
+		double[][][] out = new double[2][3][2];
+
+		for (int betti = 0; betti < 2; betti++) {
+			int max1 = 0;
+
+			for (int bar = 0; bar < bars2out[betti].length; bar++) {
+				if (length(bars2out[betti][bar]) > length(bars2out[betti][max1]))
+					max1 = bar;
 			}
-		}
-		// System.out.println("Detektovana crka je: "+detektovanaCrka);
-		return detektovanaCrka;
-	}
 
-	public static char CompareBarcode2(double[][][][] bars,
-			double[][][][][] idealneCrke) {// TODO Marija
-		char detektovanaCrka = ' ';
-		for (int i = 0; i < idealneCrke.length; i++) {
-			double[][][][] crka = idealneCrke[i];
-			if ((CompareTwoBarcodes(bars[0], crka[4]))
-					&& (CompareTwoBarcodes(bars[1], crka[5]))
-					&& (CompareTwoBarcodes(bars[2], crka[6]))
-					&& (CompareTwoBarcodes(bars[3], crka[7]))) {
-				int index = i;
-				if (index == 8) {
-					detektovanaCrka = 'I';
-				} else if (index == 9) {
-					detektovanaCrka = 'J';
-				} else if (index == 11) {
-					detektovanaCrka = 'L';
-				}
-			}
-		}
-		// System.out.println("Detektovana crka je: "+detektovanaCrka);
-		return detektovanaCrka;
-	}
+			out[betti][0] = bars2out[betti][max1];
 
-	private static double[][][] removBars(double[][][] bars) {
-		int l = 0;
-		for (int i = 0; i < bars.length; i++) {
-			if (bars[i].length > l)
-				l = bars[i].length;
-		}
-
-		double[][][] newBars = new double[bars.length][l][2];
-		for (int i = 0; i < bars.length; i++) {
-			for (int j = 0; j < bars[i].length; j++) {
-				double zacetak = bars[i][j][0];
-				double konec = bars[i][j][1];
-				if (zacetak < 100) {
-					if (konec - zacetak > 10) {
-						newBars[i][j] = bars[i][j];
+			if (bars2out[betti].length > 1) {
+				int max2 = -1;
+				for (int bar = 0; bar < bars2out[betti].length; bar++) {
+					if (bar != max1) {
+						if (max2 == -1)
+							max2 = bar;
+						if (length(bars2out[betti][bar]) > length(bars2out[betti][max2]) && length(bars2out[betti][bar]) <= length(bars2out[betti][max1]))
+							max2 = bar;
 					}
 				}
+				out[betti][1] = bars2out[betti][max2];
+
+				if (bars2out[betti].length > 2) {
+					int max3 = -1;
+					for (int bar = 0; bar < bars2out[betti].length; bar++) {
+						if (bar != max1 && bar != max2) {
+							if (max3 == -1)
+								max3 = bar;
+							if (length(bars2out[betti][bar]) > length(bars2out[betti][max3]) && length(bars2out[betti][bar]) <= length(bars2out[betti][max2]))
+								max3 = bar;
+						}
+					}
+					out[betti][2] = bars2out[betti][max3];
+				} else {
+					out[betti][2] = new double[] { 0, 0 };
+				}
+			} else {
+				out[betti][1] = new double[] { 0, 0 };
+				out[betti][2] = new double[] { 0, 0 };
 			}
 		}
-		return newBars;
+
+		return out;
 	}
+
+	private static double length(double[] bar) {
+		return bar[1] - bar[0];
+	}
+
+	public static char CompareBarcode(double[][][][] bars, double[][][][][] idealneCrke) {
+		// bars [kot][beti][bar][zacetek, konec]
+		// idealneCrke [crka][kot][beti][bar][zacetek, konec]
+		char[] crke = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l' };
+		double maxPodobnost = Double.POSITIVE_INFINITY;
+		char crka = ' ';
+		for (int i = 0; i < idealneCrke.length; i++) {
+			double[][][][] idealnaCrka = idealneCrke[i];
+			double podobnost = CompareLetter(bars, idealnaCrka);
+			if (podobnost < maxPodobnost) {
+				maxPodobnost = podobnost;
+				crka = crke[i];
+			}
+		}
+		return crka;
+	}
+
+	private static double CompareLetter(double[][][][] bars, double[][][][] idealnaCrka) {
+		//[kot][beti][bar][zacetek, konec]
+		double distance = 0;
+		
+		for (int kot=0;kot<idealnaCrka.length;kot++) {
+			for (int bar=0;bar<idealnaCrka[kot][0].length;bar++) {
+				distance += Math.abs(idealnaCrka[kot][0][bar][0] - bars[kot][0][bar][0]);
+				if (idealnaCrka[kot][0][bar][1] != Double.POSITIVE_INFINITY && bars[kot][0][bar][1]!= Double.POSITIVE_INFINITY)
+					distance += Math.abs(idealnaCrka[kot][0][bar][1] - bars[kot][0][bar][1]);
+				else if (idealnaCrka[kot][0][bar][1] == Double.POSITIVE_INFINITY)
+					distance += 100;
+				else 
+					distance += 100 - idealnaCrka[kot][0][bar][1];
+			}
+		}
+		
+		
+		return distance;
+	}
+	/*
+	 * public static char CompareBarcode(double[][][] bars, double[][][][][]
+	 * idealneCrke) { //bars [kot][beti][bar][zacetek, konec] //idealneCrke
+	 * [crka][kot][beti][bar][zacetek, konec] char detektovanaCrka = ' '; for
+	 * (int i = 0; i < idealneCrke.length; i++) { double[][][][] crka =
+	 * idealneCrke[i]; if ((CompareTwoBarcodes(bars[0], crka[0])) &&
+	 * (CompareTwoBarcodes(bars[1], crka[1])) && (CompareTwoBarcodes(bars[2],
+	 * crka[2])) && (CompareTwoBarcodes(bars[3], crka[3]))) { int index = i; if
+	 * (index == 0) { detektovanaCrka = 'A'; } else if (index == 1) {
+	 * detektovanaCrka = 'B'; } else if (index == 2) { detektovanaCrka = 'C'; }
+	 * else if (index == 3) { detektovanaCrka = 'D'; } else if (index == 4) {
+	 * detektovanaCrka = 'E'; } else if (index == 5) { detektovanaCrka = 'F'; }
+	 * else if (index == 6) { detektovanaCrka = 'G'; } else if (index == 7) {
+	 * detektovanaCrka = 'H'; } else if (index == 8) { detektovanaCrka = 'I'; }
+	 * else if (index == 9) { detektovanaCrka = 'J'; } else if (index == 10) {
+	 * detektovanaCrka = 'K'; } else if (index == 11) { detektovanaCrka = 'L'; }
+	 * } } // System.out.println("Detektovana crka je: "+detektovanaCrka);
+	 * return detektovanaCrka; }
+	 * 
+	 * private static boolean CompareTwoBarcodes(double[][] bars1, double[][][]
+	 * idealBars1) { double[][][] bars = removBars(bars1); double[][][]
+	 * idealBars = removBars(idealBars1); for (int i = 0; i <
+	 * Math.min(idealBars.length, bars.length); i++) { for (int j = 0; j <
+	 * idealBars[i].length; j++) { double zacetak = idealBars[i][j][0]; double
+	 * konec = idealBars[i][j][1]; double start = bars[i][j][0]; double end =
+	 * bars[i][j][1]; if (((0.9 * start < zacetak) && (zacetak < 1.1 * start))
+	 * && ((0.9 * end < konec) && (konec < 1.1 * end))) { //
+	 * System.out.println("true"); return true; } } } //
+	 * System.out.println("false"); return false; }
+	 * 
+	 * public static char CompareBarcode2(double[][][][] bars, double[][][][][]
+	 * idealneCrke) { char detektovanaCrka = ' '; for (int i = 0; i <
+	 * idealneCrke.length; i++) { double[][][][] crka = idealneCrke[i]; if
+	 * ((CompareTwoBarcodes(bars[0], crka[4])) && (CompareTwoBarcodes(bars[1],
+	 * crka[5])) && (CompareTwoBarcodes(bars[2], crka[6])) &&
+	 * (CompareTwoBarcodes(bars[3], crka[7]))) { int index = i; if (index == 8)
+	 * { detektovanaCrka = 'I'; } else if (index == 9) { detektovanaCrka = 'J';
+	 * } else if (index == 11) { detektovanaCrka = 'L'; } } } //
+	 * System.out.println("Detektovana crka je: "+detektovanaCrka); return
+	 * detektovanaCrka; }
+	 * 
+	 * private static double[][][] removBars(double[][][] bars) { int l = 0; for
+	 * (int i = 0; i < bars.length; i++) { if (bars[i].length > l) l =
+	 * bars[i].length; }
+	 * 
+	 * double[][][] newBars = new double[bars.length][l][2]; for (int i = 0; i <
+	 * bars.length; i++) { for (int j = 0; j < bars[i].length; j++) { double
+	 * zacetak = bars[i][j][0]; double konec = bars[i][j][1]; if (zacetak < 100)
+	 * { if (konec - zacetak > 10) { newBars[i][j] = bars[i][j]; } } } } return
+	 * newBars; }
+	 */
 }
