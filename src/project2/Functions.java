@@ -1,11 +1,15 @@
 package project2;
 
+import java.awt.Color;
 import java.awt.image.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
 import javax.imageio.ImageIO;
+import javax.swing.JFrame;
+
+import org.math.plot.Plot2DPanel;
 
 import edu.stanford.math.plex.*;
 import edu.stanford.math.plex.PersistenceInterval.Float;
@@ -17,18 +21,9 @@ import edu.stanford.math.plex.PersistenceInterval.Float;
  * 
  */
 public class Functions {
-	/*
-	 * public static void main(String[] args) { // test for function rotate
-	 * double[][][] edges = { { { 5, 5 }, { 0, 10 } }, { { 5, 0 }, { 4, 6 } } };
-	 * edges = rotate(edges, Math.PI / 4);
-	 * 
-	 * for (int i = 0; i < edges[0].length; i++) { System.out.println("(" +
-	 * edges[i][0][0] + ", " + edges[i][0][1] + ")" + ", " + "(" +
-	 * edges[i][1][0] + ", " + edges[i][1][1] + ")"); } }
-	 */
+
 	/**
-	 * Reads picture and returns array of 1's and 0's, where value 0 represents
-	 * white pixel and value 1 any other color.
+	 * Reads picture and returns array of 1's and 0's, where value 0 represents white pixel and value 1 any other color.
 	 * 
 	 * @param file
 	 * @return
@@ -100,12 +95,11 @@ public class Functions {
 	 * @return
 	 */
 	public static int[][][] defineEdges(int[][] points) {
-		return defineEdges(points, 3);
+		return defineEdges(points, Constants.edgeSize);
 	}
 
 	/**
-	 * Define edges (build a simplical complex) of dimension 1 with nerve of U.
-	 * The distance r should be 1.
+	 * Define edges (build a simplical complex) of dimension 1 with nerve of U. The distance r should be 1.
 	 * 
 	 * @param points
 	 * @param r
@@ -160,9 +154,6 @@ public class Functions {
 	 */
 	public static double[][][] normalize(int[][][] edges) {
 		// druga tocka v edge vedno visja
-		double border = 0.15; // ko rotiras za 45, mora biti stranica najvec
-								// 1/sqrt(2), ker cene grejo vogali izven
-								// kvadranta.
 
 		// find minimum point and maximum point
 		int[] min = edges[0][0].clone(), max = edges[0][0].clone();
@@ -200,17 +191,15 @@ public class Functions {
 		// now we need double values
 		double[][][] nEdges = new double[edges.length][2][2];
 		for (int edge = 0; edge < edges.length; edge++) {
-			if (edges[edge][0][1] > edges[edge][1][1]) { // ce je prva tocka
-															// visja od druge,
-															// zamenjaj vrstni
-															// red
+			if (edges[edge][0][1] > edges[edge][1][1]) { // ce je prva tocka visja od druge, zamenjaj vrstni red
 				int[] point = edges[edge][0];
 				edges[edge][0] = edges[edge][1];
 				edges[edge][1] = point;
 			}
 			for (int tocka = 0; tocka < 2; tocka++) {
 				for (int koordinata = 0; koordinata < 2; koordinata++) {
-					nEdges[edge][tocka][koordinata] = border + (1 - 2 * border) * (offset[koordinata] + (edges[edge][tocka][koordinata] - min[koordinata]) / size * stretch[koordinata]);
+					nEdges[edge][tocka][koordinata] = Constants.border + (1 - 2 * Constants.border)
+							* (offset[koordinata] + (edges[edge][tocka][koordinata] - min[koordinata]) / size * stretch[koordinata]);
 				}
 			}
 		}
@@ -218,8 +207,7 @@ public class Functions {
 	}
 
 	/**
-	 * Default origin point (0.5, 0.5). Positive angle means counter clockwise
-	 * rotation and negative angle means counter clockwise rotation.
+	 * Default origin point (0.5, 0.5). Positive angle means counter clockwise rotation and negative angle means counter clockwise rotation.
 	 * 
 	 * @param edges
 	 * @param angle
@@ -254,20 +242,19 @@ public class Functions {
 
 	private static double[] rotatePoint(double[] point, double[] originPoint, double angle) {
 		double[] newPoint = new double[2];
-		double round = 100000;
+
 		// three steps
 		// 1. A translation that brings point 1 to the origin.
 		// 2. Rotation around the origin by the required angle.
 		// 3. A translation that brings point 1 back to its original position.
-		newPoint[0] = Math.round((originPoint[0] + (point[0] - originPoint[0]) * Math.cos(angle) - (point[1] - originPoint[1]) * Math.sin(angle)) * round) / round;
-		newPoint[1] = Math.round((originPoint[1] + (point[0] - originPoint[0]) * Math.sin(angle) + (point[1] - originPoint[1]) * Math.cos(angle)) * round) / round;
+		newPoint[0] = Math.round((originPoint[0] + (point[0] - originPoint[0]) * Math.cos(angle) - (point[1] - originPoint[1]) * Math.sin(angle)) * Constants.round) / Constants.round;
+		newPoint[1] = Math.round((originPoint[1] + (point[0] - originPoint[0]) * Math.sin(angle) + (point[1] - originPoint[1]) * Math.cos(angle)) * Constants.round) / Constants.round;
 		return newPoint;
 	}
 
 	/**
-	 * Discretize the edges on the number of given stages. The points in edges
-	 * are normalized (i.e. between 0 and 1) and ordered so the firs point in
-	 * edge is smaller in y value than the second point in edge.
+	 * Discretize the edges on the number of given stages. The points in edges are normalized (i.e. between 0 and 1) and ordered so the firs point in edge is smaller in y value than the second point
+	 * in edge.
 	 * 
 	 * @param edges
 	 * @param numberOfStages
@@ -367,7 +354,6 @@ public class Functions {
 				if (bar[0] != filter.numberOfStages + 1) {
 					arrayOfbarcodes[i][j] = arrayOfPersistenceInterval[i][j].toDouble();
 				}
-
 			}
 		}
 		return arrayOfbarcodes;
@@ -444,7 +430,6 @@ public class Functions {
 	public static char CompareBarcode(double[][][][] bars, double[][][][][] idealneCrke) {
 		// bars [kot][beti][bar][zacetek, konec]
 		// idealneCrke [crka][kot][beti][bar][zacetek, konec]
-		char[] crke = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l' };
 		double maxPodobnost = Double.POSITIVE_INFINITY;
 		char crka = ' ';
 		for (int i = 0; i < idealneCrke.length; i++) {
@@ -452,80 +437,50 @@ public class Functions {
 			double podobnost = CompareLetter(bars, idealnaCrka);
 			if (podobnost < maxPodobnost) {
 				maxPodobnost = podobnost;
-				crka = crke[i];
+				crka = Constants.crke[i];
 			}
 		}
 		return crka;
 	}
 
 	private static double CompareLetter(double[][][][] bars, double[][][][] idealnaCrka) {
-		//[kot][beti][bar][zacetek, konec]
+		// [kot][beti][bar][zacetek, konec]
 		double distance = 0;
-		
-		for (int kot=0;kot<idealnaCrka.length;kot++) {
-			for (int bar=0;bar<idealnaCrka[kot][0].length;bar++) {
+
+		for (int kot = 0; kot < idealnaCrka.length; kot++) {
+			for (int bar = 0; bar < idealnaCrka[kot][0].length; bar++) {
 				distance += Math.abs(idealnaCrka[kot][0][bar][0] - bars[kot][0][bar][0]);
-				if (idealnaCrka[kot][0][bar][1] != Double.POSITIVE_INFINITY && bars[kot][0][bar][1]!= Double.POSITIVE_INFINITY)
+				if (idealnaCrka[kot][0][bar][1] != Double.POSITIVE_INFINITY && bars[kot][0][bar][1] != Double.POSITIVE_INFINITY)
 					distance += Math.abs(idealnaCrka[kot][0][bar][1] - bars[kot][0][bar][1]);
 				else if (idealnaCrka[kot][0][bar][1] == Double.POSITIVE_INFINITY)
 					distance += 100;
-				else 
+				else
 					distance += 100 - idealnaCrka[kot][0][bar][1];
 			}
 		}
-		
-		
+
 		return distance;
 	}
-	/*
-	 * public static char CompareBarcode(double[][][] bars, double[][][][][]
-	 * idealneCrke) { //bars [kot][beti][bar][zacetek, konec] //idealneCrke
-	 * [crka][kot][beti][bar][zacetek, konec] char detektovanaCrka = ' '; for
-	 * (int i = 0; i < idealneCrke.length; i++) { double[][][][] crka =
-	 * idealneCrke[i]; if ((CompareTwoBarcodes(bars[0], crka[0])) &&
-	 * (CompareTwoBarcodes(bars[1], crka[1])) && (CompareTwoBarcodes(bars[2],
-	 * crka[2])) && (CompareTwoBarcodes(bars[3], crka[3]))) { int index = i; if
-	 * (index == 0) { detektovanaCrka = 'A'; } else if (index == 1) {
-	 * detektovanaCrka = 'B'; } else if (index == 2) { detektovanaCrka = 'C'; }
-	 * else if (index == 3) { detektovanaCrka = 'D'; } else if (index == 4) {
-	 * detektovanaCrka = 'E'; } else if (index == 5) { detektovanaCrka = 'F'; }
-	 * else if (index == 6) { detektovanaCrka = 'G'; } else if (index == 7) {
-	 * detektovanaCrka = 'H'; } else if (index == 8) { detektovanaCrka = 'I'; }
-	 * else if (index == 9) { detektovanaCrka = 'J'; } else if (index == 10) {
-	 * detektovanaCrka = 'K'; } else if (index == 11) { detektovanaCrka = 'L'; }
-	 * } } // System.out.println("Detektovana crka je: "+detektovanaCrka);
-	 * return detektovanaCrka; }
+
+	/**
+	 * Plot edges in panel.
 	 * 
-	 * private static boolean CompareTwoBarcodes(double[][] bars1, double[][][]
-	 * idealBars1) { double[][][] bars = removBars(bars1); double[][][]
-	 * idealBars = removBars(idealBars1); for (int i = 0; i <
-	 * Math.min(idealBars.length, bars.length); i++) { for (int j = 0; j <
-	 * idealBars[i].length; j++) { double zacetak = idealBars[i][j][0]; double
-	 * konec = idealBars[i][j][1]; double start = bars[i][j][0]; double end =
-	 * bars[i][j][1]; if (((0.9 * start < zacetak) && (zacetak < 1.1 * start))
-	 * && ((0.9 * end < konec) && (konec < 1.1 * end))) { //
-	 * System.out.println("true"); return true; } } } //
-	 * System.out.println("false"); return false; }
-	 * 
-	 * public static char CompareBarcode2(double[][][][] bars, double[][][][][]
-	 * idealneCrke) { char detektovanaCrka = ' '; for (int i = 0; i <
-	 * idealneCrke.length; i++) { double[][][][] crka = idealneCrke[i]; if
-	 * ((CompareTwoBarcodes(bars[0], crka[4])) && (CompareTwoBarcodes(bars[1],
-	 * crka[5])) && (CompareTwoBarcodes(bars[2], crka[6])) &&
-	 * (CompareTwoBarcodes(bars[3], crka[7]))) { int index = i; if (index == 8)
-	 * { detektovanaCrka = 'I'; } else if (index == 9) { detektovanaCrka = 'J';
-	 * } else if (index == 11) { detektovanaCrka = 'L'; } } } //
-	 * System.out.println("Detektovana crka je: "+detektovanaCrka); return
-	 * detektovanaCrka; }
-	 * 
-	 * private static double[][][] removBars(double[][][] bars) { int l = 0; for
-	 * (int i = 0; i < bars.length; i++) { if (bars[i].length > l) l =
-	 * bars[i].length; }
-	 * 
-	 * double[][][] newBars = new double[bars.length][l][2]; for (int i = 0; i <
-	 * bars.length; i++) { for (int j = 0; j < bars[i].length; j++) { double
-	 * zacetak = bars[i][j][0]; double konec = bars[i][j][1]; if (zacetak < 100)
-	 * { if (konec - zacetak > 10) { newBars[i][j] = bars[i][j]; } } } } return
-	 * newBars; }
+	 * @param nEdges
+	 * @param angle
 	 */
+	public static void plotEdges(double[][][] nEdges, double angle) {
+		// create your PlotPanel (you can use it as a JPanel)
+		Plot2DPanel plot = new Plot2DPanel();
+		plot.addLinePlot("Letter with angle " + angle, new Color(0, 0, 0), new double[][] { { 0, 0 }, { 0, 1 } });
+		plot.addLinePlot("Letter with angle " + angle, new Color(0, 0, 0), new double[][] { { 0, 0 }, { 1, 0 } });
+		for (double[][] nEdge : nEdges) {
+			plot.addLinePlot("Letter with angle " + angle, new Color(0, 0, 0), nEdge);
+		}
+
+		// put the PlotPanel in a JFrame, as a JPanel
+		JFrame frame = new JFrame("a plot panel");
+		frame.setContentPane(plot);
+		frame.setVisible(true);
+		frame.setSize(400, 400);
+	}
 }
